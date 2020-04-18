@@ -207,7 +207,6 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 		$description = get_option( 'cd_news_pull_content_text' ) ?: 'content_text';
 		$image_url   = get_option( 'cd_news_pull_image' ) ?: 'image';
 		$image_alt   = get_option( 'cd_news_pull_image_alt' ) ?: 'image_alt';
-		$publish     = get_option( 'cd_news_pull_is_publish' ) ? 'publish' : 'draft';
 		$filter_tags = explode( ',', get_option( 'cd_news_pull_filter_tags' ) );
 		$t_news      = [];
 		$this->write_log( 'Notice: Starting filter by tags.' );
@@ -225,7 +224,6 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 					'post_content' => $e->content_text,
 					'post_title' => $e->title,
 					'post_type' => $post_type,
-					'post_status' => $publish,
 					'post_author' => 1,
 					'meta_input' => [
 						$cu_news_id => $e->id,
@@ -256,6 +254,7 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 		$term      = get_option( 'cd_news_pull_tag_id' );
 		$term_data = term_exists( $term, $taxonomy );
 		$news_id   = get_option( 'cd_news_pull_news_id' ) ?: 'cu_news_id';
+		$publish     = get_option( 'cd_news_pull_is_publish' ) ? 'publish' : 'draft';
 		foreach ( $t_news_array as $t_news ) {
 			$args = [
 				'numberposts' => 1,
@@ -265,6 +264,8 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 			];
 			$news_query = new WP_Query( $args );
 			if ( ! $news_query->have_posts() ) {
+				// Set the publish status.
+				$t_news->post_status = $publish;
 				$post_id = wp_insert_post( $t_news );
 				if ( ! empty( $term_data ) ) {
 					$term_res = wp_set_post_terms( $post_id, [ $term_data['term_id'] ], $taxonomy );
