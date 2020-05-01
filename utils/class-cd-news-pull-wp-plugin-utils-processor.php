@@ -97,6 +97,21 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 	 * Consider storing to plugin database instead of temporary.
 	 */
 	public function cd_news_pull_get_cron_timer() {
+		$this->write_log( 'cd_news_pull_get_cron_timer started' );
+		$date = current_time( 'timestamp' );
+		$date_str  = date( 'D M d, Y G:i', $date );
+		$this->write_log( 'Info: Last Ran: ' . $date_str );
+		$this->cd_news_pull();
+	}
+
+	/**
+	 * Use this to test with timer on lacal development.
+	 *
+	 * Consider replacing with CRON clock.
+	 * Consider storing to plugin database instead of temporary.
+	 */
+	public function cd_news_pull_loaded_timer() {
+		$this->write_log( 'cd_news_pull_get_cron_timer started' );
 		$data = get_transient( self::$transient_timer_key );
 		// Get the timer interval from settings.
 		$experation = get_option( 'cd_news_pull_timer' );
@@ -207,8 +222,8 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 		$description = get_option( 'cd_news_pull_content_text' ) ?: 'content_text';
 		$image_url   = get_option( 'cd_news_pull_image' ) ?: 'image';
 		$image_alt   = get_option( 'cd_news_pull_image_alt' ) ?: 'image_alt';
-		$publish     = get_option( 'cd_news_pull_is_publish' ) ? 'publish' : 'draft';
 		$filter_tags = explode( ',', get_option( 'cd_news_pull_filter_tags' ) );
+		$publish     = get_option( 'cd_news_pull_is_publish' ) ? 'publish' : 'draft';
 		$t_news      = [];
 		$this->write_log( 'Notice: Starting filter by tags.' );
 		foreach ( $news_response as $e ) {
@@ -225,8 +240,8 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 					'post_content' => $e->content_text,
 					'post_title' => $e->title,
 					'post_type' => $post_type,
-					'post_status' => $publish,
 					'post_author' => 1,
+					'post_status' => $publish,
 					'meta_input' => [
 						$cu_news_id => $e->id,
 						$news_url => $e->url,
@@ -256,22 +271,30 @@ class Cd_News_Pull_Wp_Plugin_Utils_Processor {
 		$term      = get_option( 'cd_news_pull_tag_id' );
 		$term_data = term_exists( $term, $taxonomy );
 		$news_id   = get_option( 'cd_news_pull_news_id' ) ?: 'cu_news_id';
+		if ( ! empty( $term_data ) ) {
+			$this->write_log( [ 'Notice: Setting default category term ', $term_data['term_id'] ] );
+		}
+
 		foreach ( $t_news_array as $t_news ) {
 			$args = [
-				'numberposts' => 1,
+				'numberposts' => -1,
 				'post_type' => $post_type,
 				'meta_key'  => $news_id,
 				'meta_value' => $t_news->meta_input[ $news_id ],
+				'post_status' => 'any',
 			];
 			$news_query = new WP_Query( $args );
-			if ( ! $news_query->have_posts() ) {
+			if ( $news_query->found_posts == 1 ) {
+				continue;
+			} else if ( $news_query->found_posts > 1 ) {
+				$this->write_log( 'WARNING: Found multiple posts with the same ID! ' . $t_news->meta_input[ $news_id ] );
+			} elseif ( ! $news_query->have_posts() ) {
+
 				$post_id = wp_insert_post( $t_news );
 				if ( ! empty( $term_data ) ) {
-					$term_res = wp_set_post_terms( $post_id, [ $term_data['term_id'] ], $taxonomy );
-					$this->write_log( [ 'Notice: Set default category term ', $term_res ] );
+					wp_set_post_terms( $post_id, [ $term_data['term_id'] ], $taxonomy );
 				}
 				$this->write_log( 'Notice: Created New News Article: ' . $t_news->post_title . ' ID:' . $post_id );
-				// $post_id = $news_query->posts[0]->ID;
 			}
 		}
 	}
