@@ -6,3 +6,4 @@ Use the settings tab to controll how data is pulled, and loaded into WP custom c
 Use the settings page to configure. Extraction settings these are the fields to configure the Pull from cunews. Transform settings map the news data fields below to the custom content data fields. Load options are WordPress save/update configuartion options.
 
 ## Sites using this plugin.
+ - https://sites.coecis.cornell.edu/mullergroup/news/
