@@ -9,7 +9,7 @@ Use the settings page to configure. Extraction settings these are the fields to 
 
 This plugin is usually used with custom content types.
 
-You can find typical Advanced Custom Fields and Custom Post Type UI settings in /docs/news-ct.php
+You can find typical Advanced Custom Fields and Custom Post Type UI settings in [/docs/news-ct.php](/docs/news-ct.php).) 
 
 Install and enable the following plugins:
 
@@ -31,6 +31,8 @@ next enable the CD News Pull plugin
 and configure the settings page `/wp-admin/admin.php?page=cd-news-pull-wp-plugin-settings`
 
 a screenshot of the settings page is in /docs/news-pull-settings.png
+
+![news-pull-settings](/docs/news-pull-settings.png)
 
 I also recommend you install optional plugin WP Crontrol
 
