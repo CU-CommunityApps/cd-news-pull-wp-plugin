@@ -16,6 +16,8 @@ Install and enable the following plugins:
 - Advanced Custom Fields
 - Custom Post Type UI
 
+I also recommend you install and enable the optional plugin WP Crontrol
+
 copy /docs/news-ct.php to your theme root directory
 
 in your theme functions.php add
@@ -30,11 +32,9 @@ next enable the CD News Pull plugin
 
 and configure the settings page `/wp-admin/admin.php?page=cd-news-pull-wp-plugin-settings`
 
-a screenshot of the settings page is in /docs/news-pull-settings.png
+Then configure the settings as in the screenshot below.
 
 ![news-pull-settings](/docs/news-pull-settings.png)
-
-I also recommend you install optional plugin WP Crontrol
 
 then run the following cron job `lando wp cron event run cd_news_pull_cron_hook`
 
